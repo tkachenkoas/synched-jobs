@@ -8,14 +8,15 @@ import org.springframework.stereotype.Component
 @Component
 class OperationBatchExecutor(
     private val operationExecutor: OperationExecutor,
-    private val meterRegistry: MeterRegistry
+    meterRegistry: MeterRegistry
 ) {
 
     private val taskExecutor: ThreadPoolTaskExecutor = ThreadPoolTaskExecutor()
 
     init {
-        taskExecutor.corePoolSize = 20
-        taskExecutor.maxPoolSize = 20
+        taskExecutor.corePoolSize = 5
+        taskExecutor.maxPoolSize = 10
+        taskExecutor.keepAliveSeconds = 1
         taskExecutor.setQueueCapacity(1000)
         taskExecutor.initialize()
 

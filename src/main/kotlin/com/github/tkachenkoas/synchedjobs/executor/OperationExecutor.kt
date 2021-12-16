@@ -13,13 +13,16 @@ class OperationExecutor(
 
     fun doTheJob(scheduledOperation: ScheduledOperation) {
         val duration = Random.nextLong(30, 100)
-        sleep(
-            if (scheduledOperation.heavy) {
-                duration * 3
-            } else {
-                duration
-            }
-        )
+        val timer = meterRegistry.timer("operation-duration")
+        timer.record {
+            sleep(
+                if (scheduledOperation.heavy) {
+                    duration * 3
+                } else {
+                    duration
+                }
+            )
+        }
 
         meterRegistry.counter(
             "operations-executed", "type",
