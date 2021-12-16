@@ -1,15 +1,18 @@
 package com.github.tkachenkoas.synchedjobs.executor
 
 import com.github.tkachenkoas.synchedjobs.getall.ScheduledOperation
+import com.github.tkachenkoas.synchedjobs.getall.ScheduledOperationOffseter
 import io.micrometer.core.instrument.MeterRegistry
+import org.springframework.core.task.TaskRejectedException
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.stereotype.Component
-import kotlin.random.Random
+import java.util.concurrent.CompletableFuture
 
 @Component
 class OperationBatchExecutor(
     private val operationExecutor: OperationExecutor,
-    meterRegistry: MeterRegistry
+    private val offseter: ScheduledOperationOffseter,
+    private val meterRegistry: MeterRegistry,
 ) {
 
     private val taskExecutor: ThreadPoolTaskExecutor = ThreadPoolTaskExecutor()
@@ -27,11 +30,19 @@ class OperationBatchExecutor(
     }
 
     fun executeBatch(batch: List<ScheduledOperation>) {
+        val executions = mutableListOf<CompletableFuture<Void>>()
         batch.forEach {
-            taskExecutor.execute {
-                operationExecutor.doTheJob(it)
+            try {
+                val asyncTask = CompletableFuture.runAsync({
+                    operationExecutor.doTheJob(it)
+                }, taskExecutor)
+                executions.add(asyncTask)
+            } catch (rejected: TaskRejectedException) {
+                meterRegistry.counter("rejected").increment()
+                offseter.offsetOperation(it, 3_000)
             }
         }
+        executions.forEach { it.get() }
     }
 
 }

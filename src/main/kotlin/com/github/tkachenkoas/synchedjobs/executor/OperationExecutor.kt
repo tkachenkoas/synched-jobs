@@ -1,6 +1,7 @@
 package com.github.tkachenkoas.synchedjobs.executor
 
 import com.github.tkachenkoas.synchedjobs.getall.ScheduledOperation
+import com.github.tkachenkoas.synchedjobs.getall.ScheduledOperationOffseter
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.stereotype.Component
 import java.lang.Thread.sleep
@@ -8,7 +9,8 @@ import kotlin.random.Random
 
 @Component
 class OperationExecutor(
-    val meterRegistry: MeterRegistry
+    private val meterRegistry: MeterRegistry,
+    private val offseter: ScheduledOperationOffseter,
 ) {
 
     fun doTheJob(scheduledOperation: ScheduledOperation) {
@@ -23,6 +25,8 @@ class OperationExecutor(
                 }
             )
         }
+
+        offseter.offsetOperation(scheduledOperation, 20_000)
 
         meterRegistry.counter(
             "operations-executed", "type",
