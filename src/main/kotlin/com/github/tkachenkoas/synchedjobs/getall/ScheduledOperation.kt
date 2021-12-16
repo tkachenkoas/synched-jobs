@@ -5,4 +5,5 @@ import org.springframework.data.mongodb.core.mapping.Document
 @Document("ScheduledOperation")
 data class ScheduledOperation(
     var operationInfo: String,
+    var heavy: Boolean
 )

@@ -1,25 +1,34 @@
 package com.github.tkachenkoas.synchedjobs.executor
 
 import com.github.tkachenkoas.synchedjobs.getall.ScheduledOperation
-import com.github.tkachenkoas.synchedjobs.reporter.ExecutedOperation
-import com.github.tkachenkoas.synchedjobs.reporter.ExecutedOperationRepository
+import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.stereotype.Component
 import java.lang.Thread.sleep
-import java.time.Duration
-import java.time.Instant
 import kotlin.random.Random
 
 @Component
-class OperationExecutor(val executedRepository: ExecutedOperationRepository) {
-
-    private val tbb: Instant = Instant.now()
+class OperationExecutor(
+    val meterRegistry: MeterRegistry
+) {
 
     fun doTheJob(scheduledOperation: ScheduledOperation) {
-        sleep(Random.nextLong(30, 100))
+        val duration = Random.nextLong(30, 100)
+        sleep(
+            if (scheduledOperation.heavy) {
+                duration * 3
+            } else {
+                duration
+            }
+        )
 
-        val elapsedMs = Duration.between(tbb, Instant.now()).toMillis()
-        val bucket: Long = elapsedMs / 500
-        executedRepository.save(ExecutedOperation(bucket, elapsedMs))
+        meterRegistry.counter(
+            "operations-executed", "type",
+            if (scheduledOperation.heavy) {
+                "heavy"
+            } else {
+                "light"
+            }
+        ).increment()
     }
 
 }

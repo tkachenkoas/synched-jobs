@@ -10,7 +10,7 @@ class GetAllJob(
     private val operationBatchExecutor: OperationBatchExecutor
 ) {
 
-    @Scheduled(fixedRate = 5_000)
+    @Scheduled(fixedRate = 20_000)
     fun doTheDirtyJob() {
         val operations = scheduledOperationRepository.findAll()
         operationBatchExecutor.executeBatch(operations)

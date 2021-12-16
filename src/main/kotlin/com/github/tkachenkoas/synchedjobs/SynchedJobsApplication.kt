@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 import org.springframework.scheduling.annotation.EnableScheduling
 import java.lang.Thread.sleep
 import java.util.*
+import kotlin.random.Random
 
 @EnableMongoRepositories
 @Import(EmbeddedMongoAutoConfiguration::class)
@@ -18,17 +19,20 @@ import java.util.*
 class SynchedJobsApplication
 
 fun main(args: Array<String>) {
-	val context = runApplication<SynchedJobsApplication>(*args)
+    val context = runApplication<SynchedJobsApplication>(*args)
 
-	val operationRepository = context.getBean(ScheduledOperationRepository::class.java)
+    val operationRepository = context.getBean(ScheduledOperationRepository::class.java)
 
-	repeat(10) {
-		val operationsToExecute = List(50) {
-			ScheduledOperation(UUID.randomUUID().toString())
-		}
-		operationRepository.saveAll(operationsToExecute)
-		sleep(1000)
-	}
+    repeat(20) {
+        val operationsToExecute = List(50) {
+            ScheduledOperation(
+                UUID.randomUUID().toString(),
+                Random.nextLong(0, 100) < 10
+            )
+        }
+        operationRepository.saveAll(operationsToExecute)
+        sleep(1000)
+    }
 
 
 }

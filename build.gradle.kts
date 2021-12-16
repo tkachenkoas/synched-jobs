@@ -17,10 +17,13 @@ repositories {
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
-	implementation("org.jfree:jfreechart:1.5.3")
+	implementation("io.micrometer:micrometer-registry-prometheus")
+
 	implementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.2.3")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
