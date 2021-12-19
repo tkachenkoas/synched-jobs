@@ -2,6 +2,7 @@ package com.github.tkachenkoas.synchedjobs.getall
 
 import org.springframework.stereotype.Component
 import java.time.Instant
+import kotlin.random.Random
 
 @Component
 class ScheduledOperationOffseter(
@@ -9,7 +10,8 @@ class ScheduledOperationOffseter(
 ) {
 
     fun offsetOperation(scheduledOperation: ScheduledOperation, offset: Long) {
-        scheduledOperation.nextExecution = Instant.now().plusMillis(offset)
+        val desync = (offset / 100) * Random.nextLong(60, 140)
+        scheduledOperation.nextExecution = Instant.now().plusMillis(desync)
         scheduledOperation.executedTimes++
         scheduledOperationRepository.save(scheduledOperation)
     }
